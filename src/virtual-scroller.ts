@@ -363,6 +363,9 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
 	@ContentChild('header', { read: ElementRef })
 	protected headerElementRef: ElementRef;
+	
+	@ContentChild('footer', { read: ElementRef })
+	protected footerElementRef: ElementRef;
 
 	@ContentChild('container', { read: ElementRef })
 	protected containerElementRef: ElementRef;
@@ -733,13 +736,22 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy {
 						this.renderer.setStyle(this.contentElementRef.nativeElement, 'webkitTransform', `${this._translateDir}(${viewport.padding}px)`);
 					}
 				}
-
+				
 				if (this.headerElementRef) {
 					let scrollPosition = this.getScrollElement()[this._scrollType];
 					let containerOffset = this.getElementsOffset();
 					let offset = Math.max(scrollPosition - viewport.padding - containerOffset + this.headerElementRef.nativeElement.clientHeight, 0);
 					this.renderer.setStyle(this.headerElementRef.nativeElement, 'transform', `${this._translateDir}(${offset}px)`);
 					this.renderer.setStyle(this.headerElementRef.nativeElement, 'webkitTransform', `${this._translateDir}(${offset}px)`);
+				}
+
+				if (this.footerElementRef) {
+					let scrollPosition = this.getScrollElement()[this._scrollType];
+					let containerOffset = this.getElementsOffset();
+					let offsetHeader = Math.max(scrollPosition - viewport.padding - containerOffset + this.headerElementRef.nativeElement.clientHeight, 0);
+					let offset = offsetHeader + (viewport.scrollEndPosition - viewport.scrollStartPosition) - this.headerElementRef.nativeElement.clientHeight - this.footerElementRef.nativeElement.clientHeight;
+					this.renderer.setStyle(this.footerElementRef.nativeElement, 'transform', `${this._translateDir}(${offset}px)`);
+					this.renderer.setStyle(this.footerElementRef.nativeElement, 'webkitTransform', `${this._translateDir}(${offset}px)`);
 				}
 
 				const changeEventArg: ChangeEvent = (startChanged || endChanged) ? {
@@ -1118,6 +1130,10 @@ export class VirtualScrollerComponent implements OnInit, OnChanges, OnDestroy {
 		if(this.headerElementRef){
 		    scrollLength += this.headerElementRef.nativeElement.clientHeight;
 		}
+		
+		if (this.footerElementRef) {
+            scrollLength += this.footerElementRef.nativeElement.clientHeight;
+        }
 
 		let viewportLength = this.horizontal ? viewportWidth : viewportHeight;
 		let maxScrollPosition = Math.max(scrollLength - viewportLength, 0);
